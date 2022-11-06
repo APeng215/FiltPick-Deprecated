@@ -1,12 +1,11 @@
 package com.apeng.filtpick.guis.custom;
 
-import com.apeng.filtpick.guis.widget.FiltPickMode;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -14,12 +13,18 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 
 public class FiltPickScreen extends HandledScreen<FiltPickScreenHandler> {
+    static TexturedButtonWidget whiteModeButton,blackModeButton;
     public static boolean filtPickIsWhiteListMode;
     private static final Identifier FILTPICK_RETURN_BUTTON_TEXTURE = new Identifier("filtpick","gui/filtpick_return_button.png");
     //A path to the gui texture. In this example we use the texture from the dispenser
     private static final Identifier FILTPICK_SCREEN_TEXTURE = new Identifier("filtpick", "gui/filtpick_screen.png");
+
+    private static final Identifier WHITELIST_BUTTON_TEXTURE = new Identifier("filtpick", "gui/filtpick_whitelist_button.png");
+
+    private static final Identifier BLACKLIST_BUTTON_TEXTURE = new Identifier("filtpick", "gui/filtpick_blacklist_button.png");
 
     public FiltPickScreen(FiltPickScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -50,14 +55,43 @@ public class FiltPickScreen extends HandledScreen<FiltPickScreenHandler> {
     }
 
     private void addChilds() {
-        this.addDrawableChild(new TexturedButtonWidget(this.x + 154 , this.y + 4, 12, 11, 0, 0, 12, FILTPICK_RETURN_BUTTON_TEXTURE, button
+
+        initModeButton();
+
+        this.addDrawableChild(createReturnButton());
+        //this.addDrawableChild(createModeSwitchWidget("mode"));
+
+    }
+
+    private void initModeButton() {
+        whiteModeButton = new TexturedButtonWidget(this.x + 10, this.y + 4, 12, 11, 0, 0, 12, WHITELIST_BUTTON_TEXTURE,button -> {
+            filtPickIsWhiteListMode = !filtPickIsWhiteListMode;//Switch
+            sendC2SPacketToSetWhiteMode(false);
+            this.remove(whiteModeButton);
+            this.addDrawableChild(blackModeButton);
+        });
+        blackModeButton = new TexturedButtonWidget(this.x + 10, this.y + 4, 12, 11, 0, 0, 12, BLACKLIST_BUTTON_TEXTURE,button -> {
+            filtPickIsWhiteListMode = !filtPickIsWhiteListMode;//Switch
+            sendC2SPacketToSetWhiteMode(true);
+            this.remove(blackModeButton);
+            this.addDrawableChild(whiteModeButton);
+        });
+        if(filtPickIsWhiteListMode){
+            this.addDrawableChild(whiteModeButton);
+        }
+        else {
+            this.addDrawableChild(blackModeButton);
+        }
+    }
+
+    @NotNull
+    private TexturedButtonWidget createReturnButton() {
+        return new TexturedButtonWidget(this.x + 154, this.y + 4, 12, 11, 0, 0, 12, FILTPICK_RETURN_BUTTON_TEXTURE, button
                 -> {
-            if (client != null&&client.player != null) {
+            if (client != null && client.player != null) {
                 client.setScreen(new InventoryScreen(client.player));
             }
-        }));
-        this.addDrawableChild(createFiltPickButtonWidget("mode"));
-
+        });
     }
 
     private void setTitleCoordination() {
@@ -65,12 +99,7 @@ public class FiltPickScreen extends HandledScreen<FiltPickScreenHandler> {
         titleX = (backgroundWidth - textRenderer.getWidth(title)) / 2;
     }
 
-    public CyclingButtonWidget<FiltPickMode> createFiltPickButtonWidget(String translationKey) {
-        return CyclingButtonWidget.builder(FiltPickMode::getTranslatableName).values(FiltPickMode.values()).initially(this.getFiltPickMode(filtPickIsWhiteListMode)).build(this.x, this.y, 50, 10, Text.translatable(translationKey), (button, filtPickMode) -> {
-            filtPickIsWhiteListMode = !filtPickIsWhiteListMode;//Switch
-            sendC2SPacketToSetWhiteMode(!filtPickMode.equals(FiltPickMode.BLACE_LIST));
-        });
-    }
+
 
     private static void sendC2SPacketToSetWhiteMode(boolean bool) {
         PacketByteBuf filtUpdataBuf = new PacketByteBuf(PacketByteBufs.create().writeBoolean(bool));
@@ -79,8 +108,5 @@ public class FiltPickScreen extends HandledScreen<FiltPickScreenHandler> {
 
 
 
-    public FiltPickMode getFiltPickMode(boolean filtPickIsWhiteListMode){
-        if(filtPickIsWhiteListMode) return FiltPickMode.WHITE_LIST;
-        else return FiltPickMode.BLACE_LIST;
-    }
+
 }
