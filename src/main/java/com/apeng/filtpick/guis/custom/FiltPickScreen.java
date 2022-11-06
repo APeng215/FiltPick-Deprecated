@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class FiltPickScreen extends HandledScreen<FiltPickScreenHandler> {
     static TexturedButtonWidget whiteModeButton,blackModeButton;
-    public static boolean filtPickIsWhiteListMode;
+    public static boolean filtPickIsWhiteListMode = false;
     private static final Identifier FILTPICK_RETURN_BUTTON_TEXTURE = new Identifier("filtpick","gui/filtpick_return_button.png");
     //A path to the gui texture. In this example we use the texture from the dispenser
     private static final Identifier FILTPICK_SCREEN_TEXTURE = new Identifier("filtpick", "gui/filtpick_screen.png");
