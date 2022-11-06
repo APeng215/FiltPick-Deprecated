@@ -64,18 +64,18 @@ public class FiltPickScreen extends HandledScreen<FiltPickScreenHandler> {
     }
 
     private void initModeButton() {
-        whiteModeButton = new TexturedButtonWidget(this.x + 10, this.y + 4, 12, 11, 0, 0, 12, WHITELIST_BUTTON_TEXTURE,button -> {
+        whiteModeButton = new TexturedButtonWidget(this.x + 10, this.y + 4, 12, 11, 0, 0, 12, WHITELIST_BUTTON_TEXTURE, 256, 256, button -> {
             filtPickIsWhiteListMode = !filtPickIsWhiteListMode;//Switch
             sendC2SPacketToSetWhiteMode(false);
             this.remove(whiteModeButton);
             this.addDrawableChild(blackModeButton);
-        });
-        blackModeButton = new TexturedButtonWidget(this.x + 10, this.y + 4, 12, 11, 0, 0, 12, BLACKLIST_BUTTON_TEXTURE,button -> {
+        }, (button, matrices, mouseX, mouseY) -> FiltPickScreen.this.renderTooltip(matrices,Text.translatable("whitelist_mode_explanation"),whiteModeButton.x, whiteModeButton.y),Text.of("whitelist_mode_explanation"));
+        blackModeButton = new TexturedButtonWidget(this.x + 10, this.y + 4, 12, 11, 0, 0, 12, BLACKLIST_BUTTON_TEXTURE,256,256,button -> {
             filtPickIsWhiteListMode = !filtPickIsWhiteListMode;//Switch
             sendC2SPacketToSetWhiteMode(true);
             this.remove(blackModeButton);
             this.addDrawableChild(whiteModeButton);
-        });
+        }, (button, matrices, mouseX, mouseY) -> FiltPickScreen.this.renderTooltip(matrices,Text.translatable("blacklist_mode_explanation"),whiteModeButton.x, whiteModeButton.y),Text.of("blacklist_mode_explanation"));
         if(filtPickIsWhiteListMode){
             this.addDrawableChild(whiteModeButton);
         }
